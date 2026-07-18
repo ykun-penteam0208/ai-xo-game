@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>最強AIとの〇×ゲーム</title>
+    <!-- Font Awesomeはこれで確実に読み込む -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { text-align: center; font-family: sans-serif; background: #fdf5e6; margin: 0; padding: 20px; }
+        .board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; justify-content: center; margin: 20px 0; }
+        .cell { width: 100px; height: 100px; border: 2px solid #333; font-size: 3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; background: white; }
+        #status { font-size: 1.5rem; margin: 10px; font-weight: bold; }
+        .controls { margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; margin: 5px; }
+        
+        /* シェアエリアのスタイル */
+        #share-area { margin-top: 20px; display: none; }
+        .x-button { background: #1da1f2; color: white; border: none; padding: 15px 25px; border-radius: 50px; cursor: pointer; font-size: 1.2rem; }
+        .x-button:hover { background: #0c8bd9; }
+    </style>
+</head>
+<body>
+
+    <h1>VS 最強AI 〇×ゲーム</h1>
+    <p>あなたのスコア: <span id="score">0</span></p>
+    <div id="status">あんたの番や！</div>
+    <div class="board" id="board"></div>
+    
+    <div class="controls">
+        <button onclick="resetGame()">やり直し</button>
+        <button onclick="toggleShare()">SNSに公開する</button>
+        
+        <!-- ここにシェアボタンを表示させる -->
+        <div id="share-area">
+            <button class="x-button" onclick="postToX()">
+                <i class="fab fa-twitter"></i> Xでスコアを投稿！
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let board = Array(9).fill(null);
+        let gameActive = true;
+        let score = 0;
+
+        function initGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            resetGame();
+        }
+
+        function toggleShare() {
+            const area = document.getElementById('share-area');
+            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function postToX() {
+            const text = `最強AIとの〇×ゲームでスコア「${score}」を出したで！`;
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+        }
+
+        function render() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            board.forEach((val, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.innerText = val || '';
+                cell.onclick = () => playerMove(i);
+                boardEl.appendChild(cell);
+            });
+        }
+
+        function playerMove(i) {
+            if (!gameActive || board[i]) return;
+            board[i] = '〇';
+            render();
+            if (checkWinner('〇')) endGame('あんたの勝ちや！', 10);
+            else if (!board.includes(null)) endGame('引き分けや！', 0);
+            else aiMove();
+        }
+
+        function aiMove() {
+            gameActive = false;
+            setTimeout(() => {
+                let bestScore = -Infinity;
+                let move = -1;
+                for (let i = 0; i < 9; i++) {
+                    if (!board[i]) {
+                        board[i] = '×';
+                        let s = minimax(board, 0, false);
+                        board[i] = null;
+                        if (s > bestScore) { bestScore = s; move = i; }
+                    }
+                }
+                if (move !== -1) board[move] = '×';
+                render();
+                if (checkWinner('×')) endGame('AIの勝ちや！', -10);
+                else if (!board.includes(null)) endGame('引き分けや！', 0);
+                else gameActive = true;
+            }, 500);
+        }
+
+        function endGame(msg, points) {
+            gameActive = false;
+            document.getElementById('status').innerText = msg;
+            score += points;
+            document.getElementById('score').innerText = score;
+        }
+
+        function resetGame() {
+            board = Array(9).fill(null);
+            gameActive = true;
+            document.getElementById('status').innerText = "あんたの番や！";
+            render();
+        }
+
+        function minimax(b, depth, isMaximizing) {
+            if (checkWinner('×')) return 10 - depth;
+            if (checkWinner('〇')) return depth - 10;
+            if (!b.includes(null)) return 0;
+            if (isMaximizing) {
+                let best = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (!b[i]) {
+                        b[i] = '×';
+                        best = Math.max(best, minimax(b, depth + 1, false));
+                        b[i] = null;
+                    }
+                }
+                return best;
+            } else {
+                let best = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (!b[i]) {
+                        b[i] = '〇';
+                        best = Math.min(best, minimax(b, depth + 1, true));
+                        b[i] = null;
+                    }
+                }
+                return best;
+            }
+        }
+
+        function checkWinner(p) {
+            const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            return lines.some(line => line.every(i => board[i] === p));
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
