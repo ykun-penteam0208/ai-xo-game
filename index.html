@@ -55,7 +55,7 @@
         }
 
         function postToX() {
-            const text = `最強AIとの〇×ゲームでスコア「${score}」を出したで！`;
+            const text = `最強AIとの〇×ゲームでスコア「${score}」を出したで！https://ykun-penteam0208.github.io/ai-xo-game/をみんな試してみな`;
             const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
             window.open(shareUrl, '_blank', 'width=600,height=400');
         }
@@ -98,6 +98,7 @@
                 render();
                 if (checkWinner('×')) endGame('AIの勝ちや！', -10);
                 else if (!board.includes(null)) endGame('引き分けや！', 0);
+                else if (checkWinner('〇')) endGame("僕の勝ちだ！", +10);
                 else gameActive = true;
             }, 500);
         }
