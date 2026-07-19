@@ -3,65 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>優しめのAIと〇×ゲーム</title>
-    <!-- ファビコンの設定 -->
-<link rel="icon" href="favicon.ico">
+    <title>VS 優しめのAI 〇×ゲーム</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { text-align: center; font-family: sans-serif; background: #fdf5e6; margin: 0; padding: 10px; }
+        body { 
+            text-align: center; font-family: 'Segoe UI', sans-serif; 
+            background: #fdf5e6; margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; 
+        }
+        h1 { color: #333; }
+        .score-board { font-size: 1.2rem; margin-bottom: 10px; font-weight: bold; }
         
-        /* スマホ対応：ボードを画面幅に合わせて伸縮させる */
         .board { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 5px; 
-            justify-content: center; 
-            margin: 20px auto; 
-            max-width: 320px; 
-            width: 100%; 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; max-width: 300px; width: 90%; margin: 20px auto; 
         }
         .cell { 
-            aspect-ratio: 1 / 1; 
-            border: 2px solid #333; 
-            font-size: 2rem; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            background: white; 
+            aspect-ratio: 1 / 1; background: white; border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; 
+            align-items: center; justify-content: center; font-size: 2.5rem; 
+            cursor: pointer; transition: transform 0.2s, background 0.3s; 
         }
+        .cell:hover { transform: scale(1.05); background: #fffdf9; }
         
-        #status { font-size: 1.2rem; margin: 10px; font-weight: bold; }
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-animation { animation: pop 0.3s ease-out; }
+
+        #status { font-size: 1.5rem; margin: 10px; font-weight: bold; color: #444; }
+        
         .controls { margin-top: 20px; }
-        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; margin: 5px; }
+        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; margin: 5px; border-radius: 20px; border: none; transition: 0.3s; }
         
-        #share-area { margin-top: 20px; display: none; }
-        .x-button { background: #1da1f2; color: white; border: none; padding: 15px 25px; border-radius: 50px; cursor: pointer; font-size: 1rem; }
+        .share-btn {
+            padding: 12px 20px; margin: 5px; border-radius: 50px;
+            color: white; font-weight: bold; cursor: pointer;
+            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .share-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
     <h1>VS 優しめのAI 〇×ゲーム</h1>
-    <p>あなたのスコア: <span id="score">0</span></p>
+    <div class="score-board">スコア: <span id="score">0</span></div>
     <div id="status">あんたの番や！</div>
     <div class="board" id="board"></div>
     
     <div class="controls">
         <button onclick="resetGame()">やり直し</button>
-        <button onclick="toggleShare()">SNSに公開する</button>
+        <button onclick="toggleShare()">SNSにシェア</button>
         <div id="share-area" style="display:none; margin-top: 20px;">
-    <p>どこでシェアする？</p>
-    <!-- SNSごとのボタン -->
-    <button onclick="shareToSNS('twitter')" style="background:#1da1f2; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">
-        <i class="fab fa-twitter"></i> X
-    </button>
-    <button onclick="shareToSNS('instagram')" style="background:#e1306c; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">
-        <i class="fab fa-instagram"></i> Instagram
-    </button>
-    <button onclick="shareToSNS('youtube')" style="background:#ff0000; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">
-        <i class="fab fa-youtube"></i> YouTube
-    </button>
-</div>
+            <p>結果をシェアするで！</p>
+            <button class="share-btn" style="background:#1da1f2;" onclick="shareToSNS('twitter')"><i class="fab fa-twitter"></i> X</button>
+            <button class="share-btn" style="background:#e1306c;" onclick="shareToSNS('instagram')"><i class="fab fa-instagram"></i> Insta</button>
+            <button class="share-btn" style="background:#ff0000;" onclick="shareToSNS('youtube')"><i class="fab fa-youtube"></i> YouTube</button>
+        </div>
     </div>
 
     <script>
@@ -69,43 +68,16 @@
         let gameActive = true;
         let score = 0;
 
-        function toggleShare() {
-            const area = document.getElementById('share-area');
-            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
-        }
-
-   // SNSにシェアするための共通処理
-function shareToSNS(platform) {
-    const score = document.getElementById('score').innerText;
-    const gameUrl = "https://ykun-penteam0208.github.io/ai-xo-game/";
-    const text = `優しめのAIとの〇×ゲームでスコア「${score}」出したで！楽しかったわー！\n${gameUrl}\n#〇×ゲーム #AI対戦`;
-
-    // 1. クリップボードにコピー
-    navigator.clipboard.writeText(text).then(() => {
-        alert("メッセージをコピーしたで！\n各SNSの投稿画面に貼り付けてな！");
-        
-        // 2. 各SNSのURLを開く
-        let targetUrl = "";
-        if (platform === 'twitter') {
-            targetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-        } else if (platform === 'instagram') {
-            targetUrl = "https://www.instagram.com/"; // インスタは投稿画面直結がないためトップへ
-        } else if (platform === 'youtube') {
-            targetUrl = "https://www.youtube.com/";   // YouTubeも同様
-        }
-        
-        if (targetUrl) window.open(targetUrl, '_blank');
-    }).catch(err => {
-        console.error('コピー失敗したわ...', err);
-    });
-}
         function render() {
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
             board.forEach((val, i) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.innerText = val || '';
+                if (val) {
+                    cell.innerText = val;
+                    cell.classList.add('pop-animation');
+                }
                 cell.onclick = () => playerMove(i);
                 boardEl.appendChild(cell);
             });
@@ -115,44 +87,63 @@ function shareToSNS(platform) {
             if (!gameActive || board[i]) return;
             board[i] = '〇';
             render();
-            if (checkWinner('〇')) endGame('あんたの勝ちや！おめでとう！', 10);
+            if (checkWinner('〇')) endGame('あんたの勝ちや！', 10);
             else if (!board.includes(null)) endGame('引き分けや！', 0);
             else aiMove();
         }
 
-        function aiMove() {
+        async function aiMove() {
             gameActive = false;
-            setTimeout(() => {
-                // AIを弱くするために、ランダムな動きを混ぜるで！
-                let move = -1;
-                const available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            document.getElementById('status').innerText = "AIが考え中...";
+            await new Promise(r => setTimeout(r, 800));
 
-                // 50%の確率で適当な場所に置く（弱体化）
-                if (Math.random() < 0.5) {
-                    move = available[Math.floor(Math.random() * available.length)];
-                } else {
-                    // それ以外はMinimaxで考えるけど、相手に勝たせてあげることもあるかも？
-                    let bestScore = -Infinity;
-                    for (let i of available) {
-                        board[i] = '×';
-                        let s = minimax(board, 0, false);
-                        board[i] = null;
-                        if (s > bestScore) { bestScore = s; move = i; }
-                    }
+            let move = -1;
+            const available = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            
+            if (Math.random() < 0.3) {
+                move = available[Math.floor(Math.random() * available.length)];
+            } else {
+                let best = -Infinity;
+                for (let i of available) {
+                    board[i] = '×';
+                    let s = minimax(board, 0, false);
+                    board[i] = null;
+                    if (s > best) { best = s; move = i; }
                 }
+            }
 
-                if (move !== -1) board[move] = '×';
-                render();
-                if (checkWinner('×')) endGame('AIの勝ちや！また次頑張ろ！', -10);
-                else if (!board.includes(null)) endGame('引き分けや！', 0);
-                else gameActive = true;
-            }, 500);
+            if (move !== -1) board[move] = '×';
+            render();
+            if (checkWinner('×')) endGame('AIの勝ちや！', -10);
+            else if (!board.includes(null)) endGame('引き分けや！', 0);
+            else { gameActive = true; document.getElementById('status').innerText = "あんたの番や！"; }
         }
 
-        function endGame(msg, points) {
+        function minimax(b, depth, isMax) {
+            if (checkWinner('×')) return 10 - depth;
+            if (checkWinner('〇')) return depth - 10;
+            if (!b.includes(null)) return 0;
+            let best = isMax ? -Infinity : Infinity;
+            for (let i = 0; i < 9; i++) {
+                if (!b[i]) {
+                    b[i] = isMax ? '×' : '〇';
+                    let val = minimax(b, depth + 1, !isMax);
+                    b[i] = null;
+                    best = isMax ? Math.max(best, val) : Math.min(best, val);
+                }
+            }
+            return best;
+        }
+
+        function checkWinner(p) {
+            const l = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            return l.some(line => line.every(i => board[i] === p));
+        }
+
+        function endGame(msg, pts) {
             gameActive = false;
             document.getElementById('status').innerText = msg;
-            score += points;
+            score += pts;
             document.getElementById('score').innerText = score;
         }
 
@@ -163,26 +154,21 @@ function shareToSNS(platform) {
             render();
         }
 
-        function minimax(b, depth, isMaximizing) {
-            if (checkWinner('×')) return 10 - depth;
-            if (checkWinner('〇')) return depth - 10;
-            if (!b.includes(null)) return 0;
-            
-            let best = isMaximizing ? -Infinity : Infinity;
-            for (let i = 0; i < 9; i++) {
-                if (!b[i]) {
-                    b[i] = isMaximizing ? '×' : '〇';
-                    let val = minimax(b, depth + 1, !isMaximizing);
-                    b[i] = null;
-                    best = isMaximizing ? Math.max(best, val) : Math.min(best, val);
-                }
-            }
-            return best;
+        function toggleShare() {
+            const area = document.getElementById('share-area');
+            area.style.display = (area.style.display === 'none') ? 'block' : 'none';
         }
 
-        function checkWinner(p) {
-            const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return lines.some(line => line.every(i => board[i] === p));
+        async function shareToSNS(platform) {
+            const text = `最強AIとの〇×ゲームでスコア「${score}」出したで！楽しかったわー！\nhttps://ykun-penteam0208.github.io/ai-xo-game/\n#〇×ゲーム #AI対戦`;
+            await navigator.clipboard.writeText(text);
+            alert("結果をコピーしたで！貼り付けてな！");
+            const urls = {
+                twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+                instagram: "https://www.instagram.com/",
+                youtube: "https://www.youtube.com/"
+            };
+            window.open(urls[platform], '_blank');
         }
 
         render();
