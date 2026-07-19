@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お絵かきツール</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #fdf5e6; display: flex; flex-direction: column; align-items: center; font-family: sans-serif; margin: 0; padding: 20px; }
+        .toolbar { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        canvas { background: white; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); cursor: crosshair; touch-action: none; max-width: 95vw; }
+        button { padding: 10px 15px; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-clear { background: #ff4757; color: white; }
+        .btn-save { background: #2ed573; color: white; }
+        .btn-back { background: #57606f; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>🎨 お絵かきコーナー</h1>
+    
+    <div class="toolbar">
+        <input type="color" id="colorPicker">
+        <input type="range" id="lineWidth" min="1" max="20" value="5">
+        <button class="btn-clear" onclick="setMode('erase')"><i class="fas fa-eraser"></i> 消しゴム</button>
+        <button onclick="setMode('pen')"><i class="fas fa-pen"></i> ペン</button>
+        <button class="btn-save" onclick="saveImage()"><i class="fas fa-download"></i> 保存</button>
+        <button class="btn-clear" onclick="clearCanvas()"><i class="fas fa-trash"></i> 全部消す</button>
+        <button class="btn-back" onclick="location.href='index.html'">戻る</button>
+    </div>
+
+    <canvas id="paintCanvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('colorPicker');
+        const lineWidth = document.getElementById('lineWidth');
+        
+        let painting = false;
+        let mode = 'pen';
+
+        function setMode(m) { mode = m; }
+
+        function startPosition(e) { painting = true; draw(e); }
+        function finishedPosition() { painting = false; ctx.beginPath(); }
+        
+        function draw(e) {
+            if (!painting) return;
+            ctx.lineWidth = lineWidth.value;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = (mode === 'erase') ? '#ffffff' : colorPicker.value;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        // マウスとタッチ両対応
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', finishedPosition);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e); });
+        canvas.addEventListener('touchend', finishedPosition);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        
+        function saveImage() {
+            const link = document.createElement('a');
+            link.download = 'my-art.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
