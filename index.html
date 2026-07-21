@@ -43,6 +43,44 @@
             transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
         }
         .share-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        /* アカウントリンク用のスタイル */
+        .social-links {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            max-width: 350px;
+            width: 90%;
+        }
+        .social-links h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .social-btn {
+            padding: 10px 15px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+        }
+        .social-btn:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -63,6 +101,16 @@
             <button class="share-btn" style="background:#1da1f2;" onclick="shareToSNS('twitter')"><i class="fab fa-twitter"></i> X</button>
             <button class="share-btn" style="background:#e1306c;" onclick="shareToSNS('instagram')"><i class="fab fa-instagram"></i> Insta</button>
             <button class="share-btn" style="background:#ff0000;" onclick="shareToSNS('youtube')"><i class="fab fa-youtube"></i> YouTube</button>
+        </div>
+    </div>
+
+    <!-- 僕のアカウントはここだよセクション -->
+    <div class="social-links">
+        <h3>✨ 僕のアカウントはここだよ ✨</h3>
+        <div class="social-buttons">
+            <a href="https://twitter.com/ykun_make" class="social-btn" style="background: #1da1f2;" target="_blank"><i class="fab fa-twitter"></i> X</a>
+            <a href="https://www.youtube.com/@make_ykun" class="social-btn" style="background: #ff0000;" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+            <a href="https://www.tiktok.com/@ykun.make.g7e" class="social-btn" style="background: #000000;" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
         </div>
     </div>
 
