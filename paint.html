@@ -17,6 +17,7 @@
         /* ツールごとの色分け */
         .group-pen { border-left: 5px solid #ff9f43; padding-left: 10px; }
         .group-tool { border-left: 5px solid #54a0ff; padding-left: 10px; }
+        .group-shape { border-left: 5px solid #ff6b6b; padding-left: 10px; }
         .group-action { border-left: 5px solid #1dd1a1; padding-left: 10px; }
 
         canvas { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); cursor: crosshair; touch-action: none; max-width: 95vw; }
@@ -53,6 +54,12 @@
             <button id="btn-erase" onclick="setMode('erase', 'btn-erase')" style="background:#c8d6e5; color:#222;"><i class="fas fa-eraser"></i> 消しゴム</button>
         </div>
 
+        <div class="group-shape">
+            <button id="btn-line" onclick="setMode('line', 'btn-line')" style="background:#ff6b6b; color:white;"><i class="fas fa-slash"></i> 直線</button>
+            <button id="btn-circle" onclick="setMode('circle', 'btn-circle')" style="background:#feca57; color:#333;"><i class="far fa-circle"></i> 円</button>
+            <button id="btn-ellipse" onclick="setMode('ellipse', 'btn-ellipse')" style="background:#48dbfb; color:#333;"><i class="fas fa-egg"></i> 楕円</button>
+        </div>
+
         <div class="group-action">
             <button onclick="saveImage()" style="background:#10ac84; color:white;"><i class="fas fa-download"></i> 保存</button>
             <button onclick="clearCanvas()" style="background:#ee5253; color:white;"><i class="fas fa-trash"></i> クリア</button>
@@ -70,6 +77,9 @@
         
         let painting = false;
         let mode = 'pen';
+        let startX = 0;
+        let startY = 0;
+        let snapshot = null; // 図形プレビュー用
 
         // 初期状態で白く塗りつぶす
         ctx.fillStyle = "white";
@@ -78,13 +88,12 @@
         // ツール切り替えとボタンのハイライト
         function setMode(m, btnId) {
             mode = m;
-            // 全てのツールボタンからハイライトを消す
-            document.querySelectorAll('.group-tool button').forEach(btn => btn.classList.remove('active-tool'));
+            // 全てのツール・図形ボタンからハイライトを消す
+            document.querySelectorAll('.group-tool button, .group-shape button').forEach(btn => btn.classList.remove('active-tool'));
             // 選んだボタンを光らせる
             document.getElementById(btnId).classList.add('active-tool');
         }
 
-        // --- 以下、描画処理 (変更なし) ---
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
@@ -93,28 +102,84 @@
         }
 
         canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            startX = pos.x;
+            startY = pos.y;
+
             if (mode === 'fill') {
-                const pos = getMousePos(e);
                 floodFill(pos.x, pos.y, hexToRgba(colorPicker.value));
             } else {
                 painting = true;
-                draw(e);
+                // 図形を描くときに今のキャンバスの状態を保存しておく（プレビュー用）
+                if (mode === 'line' || mode === 'circle' || mode === 'ellipse') {
+                    snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                }
             }
         });
 
-        canvas.addEventListener('mouseup', () => { painting = false; ctx.beginPath(); });
-        canvas.addEventListener('mousemove', (e) => { if (painting) draw(e); });
+        canvas.addEventListener('mouseup', (e) => {
+            if (!painting) return;
+            if (mode === 'line' || mode === 'circle' || mode === 'ellipse') {
+                // マウスを離したときに確定させる
+                const pos = getMousePos(e);
+                ctx.putImageData(snapshot, 0, 0);
+                drawShape(pos.x, pos.y);
+            }
+            painting = false;
+            ctx.beginPath();
+        });
 
-        function draw(e) {
-            if (mode === 'fill') return;
+        canvas.addEventListener('mousemove', (e) => {
+            if (!painting || mode === 'fill') return;
+            const pos = getMousePos(e);
+
+            if (mode === 'pen' || mode === 'erase') {
+                draw(pos.x, pos.y);
+            } else if (snapshot) {
+                // 図形のプレビュー表示（引っ張ってる途中にリアルタイムで形が変わる）
+                ctx.putImageData(snapshot, 0, 0);
+                drawShape(pos.x, pos.y);
+            }
+        });
+
+        function draw(x, y) {
             ctx.lineWidth = lineWidth.value;
             ctx.lineCap = 'round';
             ctx.strokeStyle = (mode === 'erase') ? '#ffffff' : colorPicker.value;
-            const pos = getMousePos(e);
-            ctx.lineTo(pos.x, pos.y);
+            ctx.lineTo(x, y);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
+            ctx.moveTo(x, y);
+        }
+
+        function drawShape(endX, endY) {
+            ctx.lineWidth = lineWidth.value;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = colorPicker.value;
+            ctx.fillStyle = colorPicker.value;
+
+            if (mode === 'line') {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            } else if (mode === 'circle') {
+                const radius = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                ctx.beginPath();
+                ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+            } else if (mode === 'ellipse') {
+                const radiusX = Math.abs(endX - startX) / 2;
+                const radiusY = Math.abs(endY - startY) / 2;
+                const centerX = startX + (endX - startX) / 2;
+                const centerY = startY + (endY - startY) / 2;
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
         }
 
         function floodFill(startX, startY, fillColor) {
