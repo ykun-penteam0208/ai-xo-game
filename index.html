@@ -11,16 +11,51 @@
             background: #fdf5e6; margin: 0; padding: 20px; 
             display: flex; flex-direction: column; align-items: center; 
         }
-        h1 { color: #333; }
-        .score-board { font-size: 1.2rem; margin-bottom: 10px; font-weight: bold; }
+
+        /* 🎨 意味を持たせた重層的なDivコンテナのスタイル群や！ */
+        #app-outer-wrapper {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        #game-theme-container {
+            background: linear-gradient(135deg, #fff9f0 0%, #faebd7 100%);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 2px solid #f0e6d2;
+        }
+
+        #content-inner-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #card-frame-wrapper {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        h1 { color: #333; font-size: 1.6rem; margin-top: 5px; }
+        .score-board { font-size: 1.2rem; margin-bottom: 10px; font-weight: bold; color: #e67e22; }
         
         .board { 
             display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; max-width: 300px; width: 90%; margin: 20px auto; 
+            gap: 10px; max-width: 280px; width: 100%; margin: 15px auto; 
         }
         .cell { 
-            aspect-ratio: 1 / 1; background: white; border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; 
+            aspect-ratio: 1 / 1; background: #fdfbf7; border-radius: 12px; 
+            border: 2px solid #eee; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; 
             align-items: center; justify-content: center; font-size: 2.5rem; 
             cursor: pointer; transition: transform 0.2s, background 0.3s; 
         }
@@ -32,27 +67,28 @@
         }
         .pop-animation { animation: pop 0.3s ease-out; }
 
-        #status { font-size: 1.5rem; margin: 10px; font-weight: bold; color: #444; }
+        #status { font-size: 1.3rem; margin: 10px; font-weight: bold; color: #444; }
         
-        .controls { margin-top: 20px; }
-        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; margin: 5px; border-radius: 20px; border: none; transition: 0.3s; }
+        .controls { margin-top: 10px; width: 100%; }
+        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; margin: 5px; border-radius: 20px; border: none; transition: 0.3s; font-weight: bold; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
         
         .share-btn {
-            padding: 12px 20px; margin: 5px; border-radius: 50px;
+            padding: 10px 18px; margin: 5px; border-radius: 50px;
             color: white; font-weight: bold; cursor: pointer;
-            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem;
         }
         .share-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
-        /* アカウントリンク用のスタイル */
+        /* 🌐 アカウントリンク用のスタイル */
         .social-links {
-            margin-top: 30px;
-            padding: 20px;
-            background: white;
+            margin-top: 15px;
+            padding: 15px;
+            background: #ffffff;
             border-radius: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            max-width: 350px;
-            width: 90%;
+            width: 100%;
+            box-sizing: border-box;
         }
         .social-links h3 {
             margin-top: 0;
@@ -64,10 +100,10 @@
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         .social-btn {
-            padding: 10px 15px;
+            padding: 8px 14px;
             border-radius: 30px;
             color: white;
             font-weight: bold;
@@ -75,7 +111,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: transform 0.2s;
         }
         .social-btn:hover {
@@ -85,32 +121,49 @@
 </head>
 <body>
 
-    <h1>VS 優しめのAI 〇×ゲーム</h1>
-    <div class="score-board">スコア: <span id="score">0</span></div>
-    <div id="status">あんたの番や！</div>
-    <div class="board" id="board"></div>
-    
-    <div class="controls">
-        <button onclick="resetGame()">やり直し</button>
-        <button onclick="location.href='paint.html'" style="background: #333; color: white;">
-            <i class="fas fa-palette"></i> お絵かきへ行く
-    </button>
-        <button onclick="toggleShare()">SNSにシェア</button>
-        <div id="share-area" style="display:none; margin-top: 20px;">
-            <p>結果をシェアするで！</p>
-            <button class="share-btn" style="background:#1da1f2;" onclick="shareToSNS('twitter')"><i class="fab fa-twitter"></i> X</button>
-            <button class="share-btn" style="background:#e1306c;" onclick="shareToSNS('instagram')"><i class="fab fa-instagram"></i> Insta</button>
-            <button class="share-btn" style="background:#ff0000;" onclick="shareToSNS('youtube')"><i class="fab fa-youtube"></i> YouTube</button>
-        </div>
-    </div>
+    <!-- 📦 1層目: アプリ全体の外枠ラッパー -->
+    <div id="app-outer-wrapper">
+        <!-- 🎨 2層目: テーマカラーと全体のまとまりを管理するコンテナ -->
+        <div id="game-theme-container">
+            <!-- 💻 3層目: 中身を綺麗に整頓するインナーボックス -->
+            <div id="content-inner-box">
+                
+                <h1>✨ VS 優しめのAI 〇×ゲーム ✨</h1>
+                
+                <!-- 🃏 4層目: スコアとステータスを飾るフレームラッパー -->
+                <div id="card-frame-wrapper">
+                    <div class="score-board">🏆 スコア: <span id="score">0</span></div>
+                    <div id="status">🎉 あんたの番や！</div>
+                    <div class="board" id="board"></div>
+                </div>
 
-    <!-- 僕のアカウントはここだよセクション -->
-    <div class="social-links">
-        <h3>✨ 僕のアカウントはここだよ ✨</h3>
-        <div class="social-buttons">
-            <a href="https://twitter.com/ykun_make" class="social-btn" style="background: #1da1f2;" target="_blank"><i class="fab fa-twitter"></i> X</a>
-            <a href="https://www.youtube.com/@make-ykun" class="social-btn" style="background: #ff0000;" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
-            <a href="https://www.tiktok.com/@ykun.make.g7e" class="social-btn" style="background: #000000;" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
+                <!-- 🎛️ コントロール系のフレームラッパー -->
+                <div id="card-frame-wrapper" class="controls">
+                    <button onclick="resetGame()" style="background: #e0e0e0; color: #333;"><i class="fas fa-redo"></i> やり直し</button>
+                    <button onclick="location.href='paint.html'" style="background: #333; color: white;">
+                        <i class="fas fa-palette"></i> お絵かきへ行く
+                    </button>
+                    <button onclick="toggleShare()" style="background: #ff7f50; color: white;"><i class="fas fa-share-alt"></i> SNSにシェア</button>
+                    
+                    <div id="share-area" style="display:none; margin-top: 15px;">
+                        <p style="margin: 5px 0; font-size: 0.9rem; font-weight: bold; color: #555;">🚀 結果をシェアするで！</p>
+                        <button class="share-btn" style="background:#1da1f2;" onclick="shareToSNS('twitter')"><i class="fab fa-twitter"></i> X</button>
+                        <button class="share-btn" style="background:#e1306c;" onclick="shareToSNS('instagram')"><i class="fab fa-instagram"></i> Insta</button>
+                        <button class="share-btn" style="background:#ff0000;" onclick="shareToSNS('youtube')"><i class="fab fa-youtube"></i> YouTube</button>
+                    </div>
+                </div>
+
+                <!-- 🌟 僕のアカウントはここだよセクション -->
+                <div class="social-links">
+                    <h3>💖 僕のアカウントはここだよ 💖</h3>
+                    <div class="social-buttons">
+                        <a href="https://twitter.com/ykun_make" class="social-btn" style="background: #1da1f2;" target="_blank"><i class="fab fa-twitter"></i> X</a>
+                        <a href="https://www.youtube.com/@make-ykun" class="social-btn" style="background: #ff0000;" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+                        <a href="https://www.tiktok.com/@ykun.make" class="social-btn" style="background: #000000;" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -138,14 +191,14 @@
             if (!gameActive || board[i]) return;
             board[i] = '〇';
             render();
-            if (checkWinner('〇')) endGame('あんたの勝ちや！', 10);
-            else if (!board.includes(null)) endGame('引き分けや！', 0);
+            if (checkWinner('〇')) endGame('🏆 あんたの勝ちや！', 10);
+            else if (!board.includes(null)) endGame('🤝 引き分けや！', 0);
             else aiMove();
         }
 
         async function aiMove() {
             gameActive = false;
-            document.getElementById('status').innerText = "AIが考え中...";
+            document.getElementById('status').innerText = "🤖 AIが考え中...";
             await new Promise(r => setTimeout(r, 800));
 
             let move = -1;
@@ -165,9 +218,9 @@
 
             if (move !== -1) board[move] = '×';
             render();
-            if (checkWinner('×')) endGame('AIの勝ちや！', -10);
-            else if (!board.includes(null)) endGame('引き分けや！', 0);
-            else { gameActive = true; document.getElementById('status').innerText = "あんたの番や！"; }
+            if (checkWinner('×')) endGame('😢 AIの勝ちや！', -10);
+            else if (!board.includes(null)) endGame('🤝 引き分けや！', 0);
+            else { gameActive = true; document.getElementById('status').innerText = "🎉 あんたの番や！"; }
         }
 
         function minimax(b, depth, isMax) {
@@ -201,7 +254,7 @@
         function resetGame() {
             board = Array(9).fill(null);
             gameActive = true;
-            document.getElementById('status').innerText = "あんたの番や！";
+            document.getElementById('status').innerText = "🎉 あんたの番や！";
             render();
         }
 
@@ -213,7 +266,7 @@
         async function shareToSNS(platform) {
             const text = `最強AIとの〇×ゲームでスコア「${score}」出したで！楽しかったわー！\nhttps://ykun-penteam0208.github.io/ai-xo-game/\n#〇×ゲーム #AI対戦`;
             await navigator.clipboard.writeText(text);
-            alert("結果をコピーしたで！貼り付けてな！");
+            alert("✨ 結果をコピーしたで！貼り付けてな！ ✨");
             const urls = {
                 twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
                 instagram: "https://www.instagram.com/",
